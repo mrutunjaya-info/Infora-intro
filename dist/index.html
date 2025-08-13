@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultra-Smooth 3D Card Slider</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            height: 90vh;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dots {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            z-index: 100;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dot.active {
+            background: #00d4ff;
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .dot-line {
+            width: 20px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .slider {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 1200px;
+            perspective-origin: center center;
+        }
+
+        .card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 24px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            cursor: grab;
+            -webkit-user-select: none;
+               -moz-user-select: none;
+                    user-select: none;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            -webkit-backdrop-filter: blur(10px);
+                    backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .card p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin-bottom: 32px;
+        }
+
+        .card button {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            -webkit-backdrop-filter: blur(10px);
+                    backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Card gradients */
+        .card:nth-child(1) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .card:nth-child(3) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .card:nth-child(4) {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        /* Decorative elements */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            opacity: 0.5;
+        }
+
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            opacity: 0.6;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 90%;
+            }
+            
+            .card {
+                padding: 24px;
+            }
+            
+            .card h2 {
+                font-size: 24px;
+            }
+            
+            .card p {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dots" id="dots"></div>
+        
+        <div class="slider" id="slider">
+            <div class="card" data-link="https://example.com/bioinformatics">
+                <div class="card-header">
+                    <div class="icon">🧬</div>
+                    <h2>Study Bioinformatics</h2>
+                </div>
+                <p>Learn and explore genetic data analysis with tools and techniques used by professionals in the field of genomics and biotechnology.</p>
+                <button>Learn More</button>
+            </div>
+            
+            <div class="card" data-link="https://example.com/forum">
+                <div class="card-header">
+                    <div class="icon">💬</div>
+                    <h2>Discuss Forum</h2>
+                </div>
+                <p>Join lively discussions, ask questions, share insights, and collaborate with like-minded learners and experts worldwide.</p>
+                <button>Join Now</button>
+            </div>
+            
+            <div class="card" data-link="https://example.com/error-report">
+                <div class="card-header">
+                    <div class="icon">🐛</div>
+                    <h2>Report Error</h2>
+                </div>
+                <p>Help us improve the platform by reporting technical issues, bugs, or glitches so we can make things smoother for everyone.</p>
+                <button>Report</button>
+            </div>
+            
+            <div class="card" data-link="https://example.com/research">
+                <div class="card-header">
+                    <div class="icon">🧪</div>
+                    <h2>Research & Development</h2>
+                </div>
+                <p>Innovate, create, and participate in cutting-edge research projects pushing the boundaries of knowledge and technology.</p>
+                <button>Explore</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            Drag • Swipe • Arrow Keys • Click Dots
+        </div>
+    </div>
+
+    <script>
+        class UltraSmoothSlider {
+            constructor() {
+                this.slider = document.getElementById('slider');
+                this.cards = Array.from(this.slider.children);
+                this.cardCount = this.cards.length;
+                
+                // Physics
+                this.position = 0;
+                this.velocity = 0;
+                this.isDragging = false;
+                this.isUserInteracting = false;
+                
+                // Drag state
+                this.startX = 0;
+                this.lastX = 0;
+                this.lastTime = 0;
+                this.dragVelocity = 0;
+                
+                // Animation
+                this.animationId = null;
+                this.autoPlayInterval = null;
+                
+                // Constants for ultra-smooth physics
+                this.friction = 0.85;
+                this.snapStrength = 0.12;
+                this.dragSensitivity = 0.8;
+                this.maxVelocity = 2;
+                
+                this.init();
+            }
+            
+            init() {
+                this.createDots();
+                this.bindEvents();
+                this.render();
+                this.startAutoPlay();
+            }
+            
+            createDots() {
+                const dotsContainer = document.getElementById('dots');
+                
+                for (let i = 0; i < this.cardCount; i++) {
+                    if (i > 0) {
+                        const line = document.createElement('div');
+                        line.className = 'dot-line';
+                        dotsContainer.appendChild(line);
+                    }
+                    
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.addEventListener('click', () => this.goToSlide(i));
+                    dotsContainer.appendChild(dot);
+                }
+                
+                this.dots = document.querySelectorAll('.dot');
+            }
+            
+            bindEvents() {
+                // Mouse events
+                this.slider.addEventListener('mousedown', this.onDragStart.bind(this));
+                document.addEventListener('mousemove', this.onDragMove.bind(this));
+                document.addEventListener('mouseup', this.onDragEnd.bind(this));
+                
+                // Touch events
+                this.slider.addEventListener('touchstart', this.onTouchStart.bind(this), { passive: false });
+                document.addEventListener('touchmove', this.onTouchMove.bind(this), { passive: false });
+                document.addEventListener('touchend', this.onDragEnd.bind(this));
+                
+                // Keyboard
+                document.addEventListener('keydown', this.onKeyDown.bind(this));
+                
+                // Card clicks
+                this.cards.forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        if (!this.isDragging && Math.abs(this.dragVelocity) < 0.1) {
+                            window.open(card.dataset.link, '_blank');
+                        }
+                    });
+                });
+                
+                // Prevent context menu
+                this.slider.addEventListener('contextmenu', e => e.preventDefault());
+            }
+            
+            onDragStart(e) {
+                this.startDrag(e.clientX);
+            }
+            
+            onTouchStart(e) {
+                e.preventDefault();
+                this.startDrag(e.touches[0].clientX);
+            }
+            
+            startDrag(x) {
+                this.isDragging = true;
+                this.isUserInteracting = true;
+                this.startX = x;
+                this.lastX = x;
+                this.lastTime = performance.now();
+                this.dragVelocity = 0;
+                
+                this.stopAutoPlay();
+                this.cancelAnimation();
+                
+                document.body.style.cursor = 'grabbing';
+            }
+            
+            onDragMove(e) {
+                if (!this.isDragging) return;
+                this.updateDrag(e.clientX);
+            }
+            
+            onTouchMove(e) {
+                if (!this.isDragging) return;
+                e.preventDefault();
+                this.updateDrag(e.touches[0].clientX);
+            }
+            
+            updateDrag(x) {
+                const now = performance.now();
+                const deltaX = x - this.lastX;
+                const deltaTime = now - this.lastTime;
+                
+                if (deltaTime > 0) {
+                    this.dragVelocity = deltaX / deltaTime * this.dragSensitivity;
+                    this.velocity = this.dragVelocity;
+                }
+                
+                this.position -= deltaX * 0.003; // Ultra-smooth sensitivity
+                
+                this.lastX = x;
+                this.lastTime = now;
+                
+                this.render();
+            }
+            
+            onDragEnd() {
+                if (!this.isDragging) return;
+                
+                this.isDragging = false;
+                document.body.style.cursor = '';
+                
+                // Apply momentum with ultra-smooth physics
+                this.velocity = Math.max(-this.maxVelocity, Math.min(this.maxVelocity, this.dragVelocity * 0.02));
+                
+                this.startPhysicsLoop();
+                
+                setTimeout(() => {
+                    this.isUserInteracting = false;
+                    this.startAutoPlay();
+                }, 1000);
+            }
+            
+            onKeyDown(e) {
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    this.goToSlide(this.getCurrentSlide() + 1);
+                } else if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.goToSlide(this.getCurrentSlide() - 1);
+                }
+            }
+            
+            startPhysicsLoop() {
+                this.cancelAnimation();
+                
+                const loop = () => {
+                    // Apply friction
+                    this.velocity *= this.friction;
+                    
+                    // Apply position
+                    this.position += this.velocity;
+                    
+                    // Snap to nearest slide when velocity is low
+                    if (Math.abs(this.velocity) < 0.001) {
+                        const target = Math.round(this.position);
+                        const diff = target - this.position;
+                        
+                        if (Math.abs(diff) < 0.001) {
+                            this.position = target;
+                            this.velocity = 0;
+                            this.render();
+                            return;
+                        }
+                        
+                        this.position += diff * this.snapStrength;
+                    }
+                    
+                    this.render();
+                    
+                    if (Math.abs(this.velocity) > 0.0001 || Math.abs(this.position - Math.round(this.position)) > 0.001) {
+                        this.animationId = requestAnimationFrame(loop);
+                    }
+                };
+                
+                this.animationId = requestAnimationFrame(loop);
+            }
+            
+            goToSlide(index) {
+                this.cancelAnimation();
+                this.stopAutoPlay();
+                this.isUserInteracting = true;
+                
+                const target = index;
+                const start = this.position;
+                const distance = target - start;
+                const duration = 600;
+                const startTime = performance.now();
+                
+                const animate = (now) => {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ultra-smooth easing
+                    const eased = 1 - Math.pow(1 - progress, 4);
+                    
+                    this.position = start + distance * eased;
+                    this.render();
+                    
+                    if (progress < 1) {
+                        this.animationId = requestAnimationFrame(animate);
+                    } else {
+                        setTimeout(() => {
+                            this.isUserInteracting = false;
+                            this.startAutoPlay();
+                        }, 500);
+                    }
+                };
+                
+                this.animationId = requestAnimationFrame(animate);
+            }
+            
+            getCurrentSlide() {
+                return Math.round(this.position) % this.cardCount;
+            }
+            
+            render() {
+                this.cards.forEach((card, i) => {
+                    let offset = i - (this.position % this.cardCount);
+                    
+                    // Handle infinite wrapping
+                    if (offset > this.cardCount / 2) offset -= this.cardCount;
+                    if (offset < -this.cardCount / 2) offset += this.cardCount;
+                    
+                    // Ultra-smooth 3D transforms
+                    const absOffset = Math.abs(offset);
+                    const scale = Math.max(0.7, 1 - absOffset * 0.15);
+                    const rotateY = offset * -25;
+                    const translateX = offset * 320;
+                    const translateZ = -absOffset * 100;
+                    const opacity = Math.max(0.3, 1 - absOffset * 0.4);
+                    
+                    card.style.transform = `
+                        translateX(${translateX}px) 
+                        translateZ(${translateZ}px) 
+                        rotateY(${rotateY}deg) 
+                        scale(${scale})
+                    `;
+                    card.style.opacity = opacity;
+                    card.style.zIndex = Math.round(100 - absOffset * 10);
+                });
+                
+                this.updateDots();
+            }
+            
+            updateDots() {
+                const activeIndex = ((Math.round(this.position) % this.cardCount) + this.cardCount) % this.cardCount;
+                this.dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === activeIndex);
+                });
+            }
+            
+            startAutoPlay() {
+                this.stopAutoPlay();
+                this.autoPlayInterval = setInterval(() => {
+                    if (!this.isUserInteracting && !this.isDragging) {
+                        this.goToSlide(this.getCurrentSlide() + 1);
+                    }
+                }, 4000);
+            }
+            
+            stopAutoPlay() {
+                if (this.autoPlayInterval) {
+                    clearInterval(this.autoPlayInterval);
+                    this.autoPlayInterval = null;
+                }
+            }
+            
+            cancelAnimation() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+        }
+        
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            new UltraSmoothSlider();
+        });
+    </script>
+</body>
+</html>
